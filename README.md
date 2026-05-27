@@ -1,6 +1,6 @@
 # Haggle
 
-Haggle is a hackathon MVP that lets an AI voice agent call local service businesses, collect quote details, compare options, and negotiate only after the user approves limits.
+Haggle lets an AI voice agent call local service businesses, collect quote details, compare options, and negotiate only after the user approves limits.
 
 ## Quick Start
 
@@ -23,20 +23,6 @@ Required for live calls:
 - `ELEVENLABS_AGENT_ID`
 - `ELEVENLABS_PHONE_NUMBER_ID`
 - `ELEVENLABS_WEBHOOK_SECRET`
-
-Required for live business search:
-
-- `GOOGLE_MAPS_API_KEY`
-
-Required for live AI generation:
-
-- `OPENAI_API_KEY`
-- `OPENAI_MODEL`
-
-Required for Supabase persistence:
-
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
 
 ## Scripts
 
