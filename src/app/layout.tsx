@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Haggle",
-  description: "AI-assisted service quote calls and negotiation."
+  title: "Haggle — Concierge",
+  description: "Voice concierge demo for AI outbound calls."
 };
 
 export default function RootLayout({

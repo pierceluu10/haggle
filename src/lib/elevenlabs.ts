@@ -1,59 +1,54 @@
 import crypto from "node:crypto";
-import type { BusinessLead, CallAttempt, CallPurpose, ServiceRequest } from "@/lib/types";
-import { shouldUseLiveCalls } from "@/lib/utils";
+import type { DemoContact } from "@/lib/contacts";
+import type { CallRole } from "@/lib/demo-call";
+import { isDemoMode, resolveAgentId, shouldUseLiveCalls } from "@/lib/utils";
 
 export type OutboundCallResult = {
   provider: "elevenlabs_twilio" | "demo";
   status: "calling" | "completed";
   conversationId?: string;
   callSid?: string;
+  agentRole: CallRole;
 };
 
 export function buildDynamicVariables(params: {
-  request: ServiceRequest;
-  business: BusinessLead;
-  purpose: CallPurpose;
-  negotiationAllowed: boolean;
-  targetPrice?: string;
-  maxPrice?: string;
-  negotiationNotes?: string;
-}): Record<string, string | number | boolean> {
+  contact: DemoContact;
+  userMessage?: string;
+  role: CallRole;
+}): Record<string, string> {
+  const isNegotiation = params.role === "negotiation";
+
   return {
-    request_id: params.request.id,
-    business_id: params.business.id,
-    business_name: params.business.name,
-    business_phone: params.business.phone,
-    user_request: params.request.description,
-    service_type: params.request.serviceType,
-    location: params.request.location,
-    budget: params.request.budget,
-    timeline: params.request.timeline,
-    preferences: params.request.preferences,
-    dealbreakers: params.request.dealbreakers,
-    call_opening: params.request.callPlan.opening,
-    call_questions: params.request.callPlan.questions.join(" | "),
-    negotiation_allowed: params.negotiationAllowed,
-    call_purpose: params.purpose,
-    target_price: params.targetPrice || "",
-    max_price: params.maxPrice || "",
-    negotiation_notes: params.negotiationNotes || ""
+    business_name: params.contact.name,
+    business_phone: params.contact.phone,
+    call_purpose: params.role,
+    user_request:
+      params.userMessage ||
+      (isNegotiation
+        ? "Customer asked Haggle to negotiate price with this dealer."
+        : "Customer asked Haggle Concierge to place an outbound quote call."),
+    negotiation_allowed: isNegotiation ? "true" : "false",
+    vehicle: isNegotiation ? "Honda Civic Type R" : "",
+    target_price: isNegotiation ? "31000" : ""
   };
 }
 
 export async function startOutboundCall(params: {
-  request: ServiceRequest;
-  business: BusinessLead;
-  purpose: CallPurpose;
-  negotiationAllowed: boolean;
-  targetPrice?: string;
-  maxPrice?: string;
-  negotiationNotes?: string;
+  contact: DemoContact;
+  userMessage?: string;
+  role: CallRole;
 }): Promise<OutboundCallResult> {
   if (!shouldUseLiveCalls()) {
-    return {
-      provider: "demo",
-      status: "completed"
-    };
+    return { provider: "demo", status: "completed", agentRole: params.role };
+  }
+
+  const agentId = resolveAgentId(params.role);
+  if (!agentId) {
+    throw new Error(
+      params.role === "negotiation"
+        ? "Missing negotiator agent. Set ELEVENLABS_NEGOTIATION_AGENT_ID (or ELEVENLABS_AGENT_ID)."
+        : "Missing concierge agent. Set ELEVENLABS_INQUIRY_AGENT_ID (or ELEVENLABS_AGENT_ID)."
+    );
   }
 
   const response = await fetch("https://api.elevenlabs.io/v1/convai/twilio/outbound-call", {
@@ -63,9 +58,9 @@ export async function startOutboundCall(params: {
       "xi-api-key": process.env.ELEVENLABS_API_KEY || ""
     },
     body: JSON.stringify({
-      agent_id: process.env.ELEVENLABS_AGENT_ID,
+      agent_id: agentId,
       agent_phone_number_id: process.env.ELEVENLABS_PHONE_NUMBER_ID,
-      to_number: params.business.phone,
+      to_number: params.contact.phone,
       conversation_initiation_client_data: {
         dynamic_variables: buildDynamicVariables(params)
       },
@@ -87,24 +82,22 @@ export async function startOutboundCall(params: {
     provider: "elevenlabs_twilio",
     status: "calling",
     conversationId: payload.conversation_id ?? undefined,
-    callSid: payload.callSid ?? undefined
+    callSid: payload.callSid ?? undefined,
+    agentRole: params.role
   };
 }
 
 export function verifyElevenLabsWebhook(body: string, signature: string | null): boolean {
   const secret = process.env.ELEVENLABS_WEBHOOK_SECRET;
-
-  if (!secret || process.env.DEMO_MODE === "true") {
+  if (!secret || isDemoMode()) {
     return true;
   }
-
   if (!signature) {
     return false;
   }
 
   const expected = crypto.createHmac("sha256", secret).update(body).digest("hex");
   const normalizedSignature = signature.replace(/^sha256=/, "");
-
   return crypto.timingSafeEqual(
     Buffer.from(expected, "hex"),
     Buffer.from(normalizedSignature, "hex")
@@ -163,8 +156,4 @@ export function callFailureReason(payload: unknown): string {
     event.data?.metadata?.body?.CallStatus ||
     "Call failed before transcript was captured."
   );
-}
-
-export function hasProviderIds(call: CallAttempt): boolean {
-  return Boolean(call.conversationId || call.callSid);
 }

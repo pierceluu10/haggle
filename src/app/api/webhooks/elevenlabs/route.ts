@@ -1,21 +1,39 @@
 import {
+  completeCallRecord,
+  failCallRecord,
+  getCallByProviderId
+} from "@/lib/call-store";
+import {
   callFailureReason,
   extractProviderId,
   extractTranscript,
   verifyElevenLabsWebhook
 } from "@/lib/elevenlabs";
-import { summarizeTranscript } from "@/lib/ai";
+import type { CallResult } from "@/lib/types";
 import { ok, serverError } from "@/lib/http";
-import {
-  getBusiness,
-  getCallAttemptByProviderId,
-  getServiceRequest,
-  saveCallSummary,
-  updateCallAttempt
-} from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+
+function resultFromTranscript(params: {
+  transcript: string;
+  transcriptSummary?: string;
+  contactName: string;
+}): CallResult {
+  const summary =
+    params.transcriptSummary ||
+    `${params.contactName} call completed. Review the transcript for quote details.`;
+
+  return {
+    summary,
+    priceText: "See transcript",
+    availability: "See transcript",
+    timeline: "See transcript",
+    serviceNotes: "Captured from live ElevenLabs call.",
+    transcript: params.transcript || summary,
+    confidence: params.transcript ? "medium" : "low"
+  };
+}
 
 export async function POST(request: Request) {
   try {
@@ -31,17 +49,14 @@ export async function POST(request: Request) {
 
     const payload = JSON.parse(rawBody) as { type?: string };
     const providerId = extractProviderId(payload);
-    const call = providerId ? await getCallAttemptByProviderId(providerId) : undefined;
+    const call = providerId ? getCallByProviderId(providerId) : undefined;
 
     if (!call) {
-      return ok({ ok: true, ignored: "No matching call attempt." }, { status: 202 });
+      return ok({ ok: true, ignored: "No matching call." }, { status: 202 });
     }
 
     if (payload.type === "call_initiation_failure") {
-      await updateCallAttempt(call.id, {
-        status: "failed",
-        failureReason: callFailureReason(payload)
-      });
+      failCallRecord(call.id, callFailureReason(payload));
       return ok({ ok: true });
     }
 
@@ -49,24 +64,15 @@ export async function POST(request: Request) {
       return ok({ ok: true, ignored: "Unsupported webhook type." }, { status: 202 });
     }
 
-    const serviceRequest = await getServiceRequest(call.requestId);
-    const business = await getBusiness(call.businessId);
-
-    if (!serviceRequest || !business) {
-      return ok({ ok: true, ignored: "Call is missing linked request or business." }, { status: 202 });
-    }
-
     const transcriptData = extractTranscript(payload);
-    const summary = await summarizeTranscript({
-      request: serviceRequest,
-      business,
-      callAttemptId: call.id,
-      purpose: call.purpose,
-      transcript: transcriptData.transcript,
-      transcriptSummary: transcriptData.transcriptSummary
-    });
+    completeCallRecord(
+      call.id,
+      resultFromTranscript({
+        ...transcriptData,
+        contactName: call.contactName
+      })
+    );
 
-    await saveCallSummary(summary);
     return ok({ ok: true });
   } catch (error) {
     return serverError(error);
