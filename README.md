@@ -7,7 +7,7 @@ Haggle is a voice-first app that helps you shop and negotiate by phone. You talk
 One product, two ElevenLabs agents:
 
 - **Concierge** — your in-app voice assistant. You describe what you need, ask for options, and decide who to call.
-- **Negotiator** — the outbound caller. It dials businesses on your behalf (today wired for negotiation-style calls to the third contact in the list).
+- **Negotiator** — the outbound caller. It dials businesses on your behalf.
 
 The current build focuses on **local car dealerships**: three preset contacts, live Concierge conversation, and negotiator outbound calls through ElevenLabs + Twilio.
 
@@ -16,9 +16,7 @@ The current build focuses on **local car dealerships**: three preset contacts, l
 1. **Open the app** and tap the mic. You’re connected to the Concierge (ElevenLabs conversational AI when configured).
 2. **Ask for what you need** — e.g. *“Pull up local car dealerships.”* The app shows three dealers (names and numbers).
 3. **Choose who to call** — e.g. *“Call the third number.”* The Concierge dispatches the **Negotiator**, which places an outbound call via ElevenLabs.
-4. **See the outcome** — after the call, results appear in the UI (live: from the post-call webhook when set up; you can also press **F** to show a preset negotiation summary for demos).
-
-The Concierge does not dial numbers itself. It routes the request; the Negotiator agent and `/api/call` handle the actual phone call.
+4. **See the outcome** — after the call, results appear in the UI.
 
 ## Architecture
 
@@ -44,43 +42,3 @@ Browser (voice UI)
 | `src/lib/contacts.ts` | Three hardcoded dealership contacts |
 | `src/app/api/call/route.ts` | Starts outbound calls |
 | `src/lib/call-store.ts` | In-memory call state (dev / single instance) |
-
-Agent prompts and ElevenLabs tool names: **`AGENT-PROMPTS.md`**.
-
-## Setup
-
-```bash
-npm install
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-Copy `.env.example` to `.env.local`. For real Concierge + outbound calls:
-
-```bash
-DEMO_MODE=false
-
-ELEVENLABS_API_KEY=
-ELEVENLABS_INQUIRY_AGENT_ID=      # Concierge
-ELEVENLABS_NEGOTIATION_AGENT_ID=  # Negotiator (outbound)
-ELEVENLABS_PHONE_NUMBER_ID=
-ELEVENLABS_WEBHOOK_SECRET=        # optional; needed for live call summaries
-```
-
-Webhook URL (when deployed or tunneled):
-
-`https://<your-host>/api/webhooks/elevenlabs`
-
-With `DEMO_MODE=true`, the UI runs without ringing a phone; outbound negotiation calls return a configuration hint instead of placing a call.
-
-## Scripts
-
-```bash
-npm run dev
-npm run build
-npm run test
-npm run typecheck
-```
-
-UI styling is documented in **`DESIGN.md`**.
