@@ -4,7 +4,7 @@ Haggle is a voice-first app that helps you shop and negotiate by phone. You talk
 
 ## Overview
 
-One product, two ElevenLabs agents:
+**Two Agents:**
 
 - **Concierge** — your in-app voice assistant. You describe what you need, ask for options, and decide who to call.
 - **Negotiator** — the outbound caller. It dials businesses on your behalf.
