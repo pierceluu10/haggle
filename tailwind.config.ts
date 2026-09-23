@@ -9,54 +9,92 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        canvas: "#f5f5f5",
-        "canvas-soft": "#fafafa",
-        ink: "#0c0a09",
-        body: "#4e4e4e",
-        muted: "#777169",
-        "muted-soft": "#a8a29e",
-        primary: "#292524",
-        "primary-active": "#0c0a09",
-        hairline: "#e7e5e4",
-        "surface-card": "#ffffff",
-        "surface-strong": "#f0efed",
-        "gradient-mint": "#a7e5d3",
-        "gradient-peach": "#f4c5a8",
-        "gradient-lavender": "#c8b8e0",
-        "gradient-sky": "#a8c8e8",
-        "gradient-rose": "#e8b8c4",
-        voice: {
-          bg: "#050a18",
-          "bg-mid": "#0a1229",
-          glow: "#007aff",
-          cyan: "#00f2ff"
-        }
+        // Surfaces — warm ivory floor, fine paper above it
+        canvas: "#f4f2ec",
+        "canvas-soft": "#faf9f5",
+        paper: "#fcfbf8",
+        // Text — warm near-black through to readable muted
+        ink: "#1a1813",
+        "ink-soft": "#3d3a33",
+        body: "#5c574e",
+        muted: "#6e685c",
+        "muted-soft": "#928c80",
+        // Hairlines
+        hairline: "#e4dfd4",
+        "hairline-strong": "#d4cebf",
+        // Brand — deep pine "dealmaker's felt"
+        pine: "#234b3b",
+        "pine-deep": "#173329",
+        "pine-tint": "#dbe6dd",
+        "pine-soft": "#eef3ee",
+        "on-pine": "#f5f3ee",
+        // Accent — restrained brass, "deal closed"
+        brass: "#b0863a",
+        "brass-deep": "#8a6727",
+        "brass-soft": "#f1e7cf",
+        // Semantic
+        success: "#2f7d5b",
+        warning: "#a9711a",
+        error: "#b3261e"
       },
       fontFamily: {
-        display: ['"EB Garamond"', "Georgia", "serif"],
-        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"]
+        display: ["var(--font-display)", "Georgia", "Cambria", "serif"],
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"]
       },
       borderRadius: {
         pill: "9999px",
-        xl: "16px",
-        xxl: "24px"
+        sm: "8px",
+        md: "12px",
+        lg: "16px",
+        xl: "20px",
+        "2xl": "28px"
       },
       boxShadow: {
-        card: "0 4px 16px rgba(0, 0, 0, 0.04)",
-        orb: "inset 0 0 60px rgba(0, 122, 255, 0.35), 0 0 80px rgba(0, 242, 255, 0.25)"
+        card: "0 1px 2px rgba(36,30,16,0.04), 0 10px 28px -16px rgba(36,30,16,0.16)",
+        "card-hover":
+          "0 2px 4px rgba(36,30,16,0.05), 0 18px 44px -18px rgba(36,30,16,0.22)",
+        pill: "0 1px 2px rgba(36,30,16,0.06), 0 14px 36px -14px rgba(36,30,16,0.24)",
+        "pine-glow": "0 10px 30px -8px rgba(35,75,59,0.45)",
+        focus: "0 0 0 3px rgba(35,75,59,0.22)"
+      },
+      transitionTimingFunction: {
+        "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "out-quart": "cubic-bezier(0.25, 1, 0.5, 1)"
       },
       animation: {
-        "orb-pulse": "orb-pulse 4s ease-in-out infinite",
-        "orb-spin": "orb-spin 12s linear infinite"
+        breathe: "breathe 6s ease-in-out infinite",
+        "breathe-active": "breathe 3.4s ease-in-out infinite",
+        "ring-pulse": "ring-pulse 2.8s cubic-bezier(0.16,1,0.3,1) infinite",
+        "ring-pulse-delayed": "ring-pulse 2.8s cubic-bezier(0.16,1,0.3,1) infinite 1.4s",
+        "orb-drift": "orb-drift 16s linear infinite",
+        work: "work-spin 2.2s linear infinite",
+        rise: "rise 0.55s cubic-bezier(0.16,1,0.3,1) both",
+        "fade-in": "fade-in 0.4s ease-out both"
       },
       keyframes: {
-        "orb-pulse": {
-          "0%, 100%": { transform: "scale(1)", opacity: "0.9" },
-          "50%": { transform: "scale(1.04)", opacity: "1" }
+        breathe: {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.035)" }
         },
-        "orb-spin": {
+        "ring-pulse": {
+          "0%": { transform: "scale(0.86)", opacity: "0.5" },
+          "100%": { transform: "scale(1.55)", opacity: "0" }
+        },
+        "orb-drift": {
           "0%": { transform: "rotate(0deg)" },
           "100%": { transform: "rotate(360deg)" }
+        },
+        "work-spin": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" }
+        },
+        rise: {
+          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" }
+        },
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" }
         }
       }
     }

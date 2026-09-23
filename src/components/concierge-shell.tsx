@@ -1,7 +1,6 @@
 "use client";
 
 import { ConversationProvider } from "@elevenlabs/react";
-import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import ConciergeApp from "@/components/concierge-app";
 
@@ -24,8 +23,11 @@ export default function ConciergeShell() {
 
   if (!ready) {
     return (
-      <main className="voice-bg grid min-h-screen place-items-center text-white/60">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <main className="stage grid min-h-screen place-items-center">
+        <div className="orb-stage h-28 w-28">
+          <span className="orb-shadow" />
+          <span className="orb block h-full w-full animate-breathe-active opacity-90" />
+        </div>
       </main>
     );
   }
