@@ -2,6 +2,22 @@
 
 Haggle is a voice-first app that helps you shop and negotiate by phone. You talk to a **Concierge** in the browser; when you’re ready, it hands off to a **Negotiator** that places real outbound calls and brings back what happened on the line.
 
+## Screenshots
+
+The negotiation result below uses the local demo; no outbound call was placed for the screenshot.
+
+### Concierge and Negotiator
+
+The in-app Concierge hands off to the outbound Negotiator.
+
+<img width="1200" alt="Haggle showing the Concierge and Negotiator roles" src="docs/screenshots/agents.jpg" />
+
+### Negotiation outcome
+
+A demo dealership negotiation with the offer, savings and pickup details.
+
+<img width="1200" alt="Haggle local demo showing a dealership negotiation result" src="docs/screenshots/negotiation-demo.jpg" />
+
 ## Overview
 
 **Two Agents:**
